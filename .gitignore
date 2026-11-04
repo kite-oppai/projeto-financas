@@ -18,6 +18,9 @@ exports/
 .env.*
 !.env.example
 .streamlit/secrets.toml
+.streamlit/.senha-*.tmp
 *.log
 .coverage
 htmlcov/
+logs/
+backups/

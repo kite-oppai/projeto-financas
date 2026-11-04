@@ -2,11 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Finanças: executar e depurar",
+      "name": "Finanças: executar e depurar (somente PC)",
       "type": "debugpy",
       "request": "launch",
       "module": "streamlit",
-      "args": ["run", "app.py", "--server.address", "127.0.0.1"],
+      "args": [
+        "run",
+        "app.py",
+        "--server.address",
+        "127.0.0.1"
+      ],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "justMyCode": true
@@ -16,9 +21,25 @@
       "type": "debugpy",
       "request": "launch",
       "module": "streamlit",
-      "args": ["run", "app.py", "--server.address", "127.0.0.1"],
+      "args": [
+        "run",
+        "app.py",
+        "--server.address",
+        "127.0.0.1"
+      ],
       "cwd": "${workspaceFolder}",
-      "env": {"FINANCAS_DB_PATH": "${workspaceFolder}/data/demo.db"},
+      "env": {
+        "FINANCAS_DB_PATH": "${workspaceFolder}/data/demo.db"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Finanças: celular (LAN/Tailscale)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "services.launcher",
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "justMyCode": true
     }

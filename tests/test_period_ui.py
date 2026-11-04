@@ -1,3 +1,4 @@
+from tests.ui_helpers import login
 """O período da navegação precisa definir a data do novo lançamento."""
 from datetime import date
 from streamlit.testing.v1 import AppTest
@@ -14,7 +15,7 @@ def test_switching_month_and_year_resets_new_transaction_date(tmp_path, monkeypa
         create_account(db, 'Conta para teste de período', 'corrente')
     finally:
         db.close()
-    at = AppTest.from_file('app.py', default_timeout=15).run()
+    at = login(AppTest.from_file('app.py', default_timeout=15))
     at.sidebar.radio[0].set_value('Lançamentos').run()
     # Um rascunho em outra data também não deve manter a data ao trocar o período.
     at.date_input(key='new_tx_date').set_value(date(2024, 7, 12)).run()

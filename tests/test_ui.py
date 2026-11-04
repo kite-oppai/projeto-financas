@@ -1,3 +1,4 @@
+from tests.ui_helpers import login
 """Fluxos reais do Streamlit com bases temporárias, sem iniciar servidor."""
 from datetime import date
 from contextlib import closing
@@ -29,7 +30,7 @@ def navigate(app, page):
 
 def test_empty_database_all_pages_render(tmp_path, monkeypatch):
     monkeypatch.setenv("FINANCAS_DB_PATH", str(tmp_path / "empty.db"))
-    app = AppTest.from_file(APP, default_timeout=15).run()
+    app = login(AppTest.from_file(APP, default_timeout=15))
     assert not app.exception
     assert [metric.value for metric in app.metric] == ["R$ 0,00"] * 3
     for page in PAGES:
@@ -40,7 +41,7 @@ def test_demo_dashboard_and_budget_alerts(tmp_path, monkeypatch):
     path = tmp_path / "demo.db"
     seed_demo(path, today=date.today())
     monkeypatch.setenv("FINANCAS_DB_PATH", str(path))
-    app = AppTest.from_file(APP, default_timeout=15).run()
+    app = login(AppTest.from_file(APP, default_timeout=15))
     assert not app.exception
     metrics = {metric.label: metric.value for metric in app.metric}
     assert metrics == {
@@ -58,7 +59,7 @@ def test_demo_dashboard_and_budget_alerts(tmp_path, monkeypatch):
 def test_account_transaction_validation_and_confirmed_deletion(tmp_path, monkeypatch):
     path = tmp_path / "personal.db"
     monkeypatch.setenv("FINANCAS_DB_PATH", str(path))
-    app = AppTest.from_file(APP, default_timeout=15).run()
+    app = login(AppTest.from_file(APP, default_timeout=15))
     navigate(app, "Contas e cartões")
     app.text_input(key="new_account_name").set_value("Carteira")
     app.text_input(key="new_account_balance").set_value("100,00")

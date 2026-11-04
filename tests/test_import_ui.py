@@ -1,3 +1,4 @@
+from tests.ui_helpers import login
 """Exercita a prévia na interface; somente o seletor de arquivo é substituído.
 
 AppTest não expõe upload de arquivos. Os bytes abaixo passam pelo leitor,
@@ -25,7 +26,7 @@ def start_import(tmp_path, monkeypatch, content):
     monkeypatch.setenv("FINANCAS_DB_PATH", str(path))
     upload = SimpleNamespace(name="extrato.csv", getvalue=lambda: content)
     monkeypatch.setattr(st, "file_uploader", lambda *args, **kwargs: upload)
-    app = AppTest.from_file(APP, default_timeout=15).run()
+    app = login(AppTest.from_file(APP, default_timeout=15))
     app.radio(key="navigation").set_value("Importar e exportar").run()
     assert not app.exception
     return app, path

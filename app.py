@@ -6,13 +6,19 @@ from database.core import get_connection, initialize
 from services.recurring import generate_due
 from ui import dashboard, transactions, catalogs, budgets, imports, recurrences, goals
 from ui.common import MONTH_NAMES, flash
+from ui.auth import require_login, logout_button
+from services.backup import backup_once
+from database.core import DEFAULT_DB
+import os
 
 st.set_page_config(page_title='Minhas finanças', page_icon='💰', layout='wide')
 
 
 def main():
+    require_login()
     with st.sidebar:
         st.title('Minhas finanças')
+        logout_button()
         st.caption('Seu dinheiro, sob seu controle.')
         page = st.radio('Navegação', ['Visão geral', 'Lançamentos', 'Contas e cartões', 'Categorias',
             'Orçamento', 'Importar e exportar', 'Recorrências', 'Metas'], key='navigation')
@@ -27,6 +33,7 @@ def main():
         st.caption('🔒 Dados locais em SQLite. Sem integrações ou envio de dados financeiros à internet.')
     db = None
     try:
+        backup_once(os.environ.get('FINANCAS_DB_PATH', DEFAULT_DB))
         db = get_connection()
         initialize(db)
         generated = generate_due(db)
