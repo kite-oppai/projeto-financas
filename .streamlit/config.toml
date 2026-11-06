@@ -11,8 +11,8 @@ enableXsrfProtection = true
 enableStaticServing = false
 
 [theme]
-primaryColor = "#137C66"
-backgroundColor = "#F6F8FA"
+primaryColor = "#5158B8"
+backgroundColor = "#F7F8FC"
 secondaryBackgroundColor = "#FFFFFF"
-textColor = "#18332F"
+textColor = "#202D49"
 font = "sans serif"

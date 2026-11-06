@@ -2,6 +2,10 @@
 
 Aplicativo de controle financeiro pessoal em português, executado no seu computador com **Python 3.11+, Streamlit e SQLite**. Registre receitas e despesas, acompanhe orçamento e metas, importe extratos e visualize seu histórico mensal e anual.
 
+![Resumo com tema Liquid Glass e dados fictícios](docs/liquid-glass-desktop.png)
+
+[Ver prévia em tela de 360 px](docs/liquid-glass-mobile.png). As imagens usam somente dados de demonstração.
+
 ## Instalação e primeira execução no Windows
 
 Abra o projeto no VS Code e use **Terminal → Novo Terminal** (PowerShell), na pasta que contém `app.py`. É necessário Python 3.11 ou superior:
@@ -42,13 +46,33 @@ python -m services.launcher
 
 O comando `streamlit run app.py` continua disponível. O launcher é recomendado para executar a verificação e o backup antes de o servidor aceitar conexões. Na execução direta do Streamlit, o código do app só inicia quando um navegador estabelece uma sessão; o backup ocorre após o primeiro login válido, antes de alterar o banco.
 
-## Começando
+### Atualizar uma instalação existente
 
-1. Cadastre uma conta corrente, poupança, dinheiro ou cartão e informe o saldo inicial.
-2. Registre um lançamento com data, descrição, valor positivo, tipo, categoria e conta. O tipo determina se o valor entra ou sai.
-3. Escolha mês e ano para acompanhar receitas, despesas, saldo do período, gráficos e comparação com o mês anterior.
-4. Defina limites mensais por categoria. A partir de 80% do limite há alerta; a partir de 100%, o limite foi atingido ou ultrapassado.
-5. Use as demais páginas para importar extratos, configurar recorrências, acompanhar metas e exportar dados.
+Encerre o app e preserve `data/`, `.streamlit/secrets.toml` e sua `.venv`. Se clonou com Git, execute `git pull origin main` na pasta do projeto. Se baixou um ZIP, copie os arquivos de código novos para a pasta atual, incluindo `ui/styles.css`, sem apagar os dados ou a configuração da senha. Este redesign não altera o esquema do banco nem exige trocar a senha. Inicie novamente com `run_mobile.bat`, atualize a página com `Ctrl+F5` e faça login.
+
+## Interface e primeiros passos
+
+A navegação foi organizada em quatro áreas, com controles nativos horizontais que se adaptam à largura disponível. No celular, ela permanece no fluxo da página para não cobrir formulários ou o teclado.
+
+| Área | Onde encontrar cada recurso |
+| --- | --- |
+| **Resumo** | Saldo do mês, receitas, despesas, gastos por categoria e os cinco últimos lançamentos. **Ver detalhes** abre comparação mensal, evolução diária, maiores despesas e histórico anual. |
+| **Movimentos** | Lançamentos, busca e filtros sob demanda; na seção **Importar e exportar**, prévia CSV/OFX e downloads CSV/Excel. |
+| **Planejamento** | Orçamento, recorrências e metas com seus respectivos cadastros e ajustes. |
+| **Ajustes** | Contas e cartões, categorias e informações de segurança/configuração disponíveis. |
+
+1. Em **Ajustes → Contas e cartões**, escolha **Adicionar conta/cartão** no controle **Gerenciar contas e cartões**, preencha o cadastro e informe seu saldo inicial.
+2. No **Resumo** ou em **Movimentos → Lançamentos**, clique em **+ Novo lançamento**. O cadastro abre em uma janela; preencha data, descrição, valor positivo, tipo, categoria e conta. O tipo determina se o valor entra ou sai. **Cancelar** fecha a janela sem gravar.
+3. Use as setas ao lado da competência para avançar ou voltar um mês. Clique no nome do mês/ano para selecionar diretamente a competência. Um novo lançamento começa com a data de hoje no mês atual ou com o primeiro dia de outro mês escolhido.
+4. Em **Movimentos → Lançamentos**, use **Gerenciar lançamentos** para selecionar um registro e abrir **Editar lançamento**. A exclusão exige confirmação explícita e fica na janela de edição.
+5. Em **Planejamento → Orçamento**, defina limites mensais por categoria. A partir de 80% há aviso textual; a partir de 100%, o limite foi atingido ou ultrapassado. Os valores gasto, limite e restante ficam visíveis sem barras grandes.
+6. Abra **Planejamento → Recorrências/Metas** para acompanhar obrigações e reservas. Escolha a ação desejada no seletor de gerenciamento para abrir um formulário por vez; **Fechar formulário** recolhe esse formulário. As opções de cadastro, edição, exclusão e aportes foram preservadas.
+
+### Visual inspirado em Liquid Glass
+
+O tema claro usa fundo com degradês discretos, tipografia de alto contraste e transparência concentrada na navegação, no saldo em destaque e nas janelas. As listas e os formulários ficam sobre superfícies de leitura limpa. O visual é uma adaptação para Streamlit, não uma reprodução de todas as interações nativas do iOS.
+
+Os estilos são locais e centralizados em `ui/styles.css`; não há fontes, imagens, scripts ou CDNs externos. Navegadores sem suporte a desfoque recebem fundos sólidos de fallback. As transições são breves e respeitam a preferência de movimento reduzido do sistema. A navegação mantém rótulos, foco visível e controles nativos para teclado/leitores de tela.
 
 Valores aceitam `1234,56`, `1.234,56` e `1234.56`. O aplicativo não arredonda entradas com mais de duas casas decimais. Valores são exibidos como `R$ 1.234,56`; datas, como `dd/mm/aaaa`.
 
@@ -270,13 +294,24 @@ Os testes usam bancos temporários e cobrem valores, saldos, orçamento, recorr�
 
 Roteiro rápido na base de demonstração:
 
-1. Confira receitas e despesas do mês atual e do anterior, gráfico por categoria, evolução e maiores despesas.
-2. Cadastre uma despesa de `10,50`; confirme que o saldo da conta diminui exatamente esse valor. Edite para `12,50` e depois exclua para conferir a reversão.
-3. Confira os três estados de orçamento: Moradia abaixo de 80%, Mercado acima de 80% e Lazer acima do limite.
-4. Crie uma regra com início no mês atual e dia 1, atualize a página duas vezes e confira que existe somente um lançamento daquela competência.
-5. Registre um aporte em uma meta e confira o progresso; o saldo da conta deve permanecer igual.
-6. Importe um pequeno extrato com prévia e depois o mesmo arquivo novamente para conferir a detecção de duplicatas.
-7. Exporte os dados e abra o CSV/Excel para conferir moeda, datas e registros.
+1. No **Resumo**, confira os três valores do mês, o gráfico por categoria e os cinco últimos lançamentos. Ative **Ver detalhes** para conferir evolução diária, comparação mensal, maiores despesas e histórico anual.
+2. Use **+ Novo lançamento** para cadastrar uma despesa de `10,50`; confirme que o saldo da conta diminui exatamente esse valor. Em **Movimentos → Lançamentos → Gerenciar lançamentos**, edite para `12,50` e depois exclua com confirmação para conferir a reversão.
+3. Em **Planejamento → Orçamento**, confira os três estados: Moradia abaixo de 80%, Mercado acima de 80% e Lazer acima do limite. O estado é comunicado por texto, além da cor.
+4. Em **Planejamento → Recorrências**, crie uma regra com início no mês atual e dia 1, atualize a página duas vezes e confira que existe somente um lançamento daquela competência.
+5. Em **Planejamento → Metas**, registre um aporte e confira o progresso, alvo e prazo; o saldo da conta deve permanecer igual.
+6. Em **Movimentos → Importar e exportar**, importe um pequeno extrato com prévia e depois o mesmo arquivo novamente para conferir a detecção de duplicatas.
+7. Na mesma seção, prepare os downloads CSV/Excel e confira moeda, datas e registros. Cancele uma janela de cadastro e confira que nenhum lançamento foi salvo.
+
+### Checklist manual do visual e dos formulários
+
+- [ ] Abrir em desktop e em tela de aproximadamente 360 px, confirmar que não há rolagem horizontal na página e que textos/valores longos continuam legíveis.
+- [ ] Navegar pelas quatro áreas e suas subseções sem perder a competência selecionada; testar dezembro → janeiro e a volta.
+- [ ] Abrir **+ Novo lançamento**, preencher um rascunho e cancelar. Reabrir e confirmar que nada foi gravado nem reaproveitado indevidamente.
+- [ ] Cadastrar, editar e excluir um lançamento com confirmação; conferir os valores exatos nos saldos e no Resumo.
+- [ ] Ativar/desativar **Ver detalhes** e verificar que os relatórios adicionais aparecem somente quando pedidos.
+- [ ] Usar Tab/Shift+Tab para verificar foco visível e acesso a menus, seletor de competência, botões e formulários.
+- [ ] Ativar movimento reduzido no sistema e conferir que as transições são removidas. O conteúdo deve continuar utilizável sem suporte a desfoque.
+- [ ] No celular, abrir o teclado dentro do diálogo e verificar que o formulário e as ações continuam alcançáveis por rolagem.
 
 ### Checklist manual de rede e inicialização
 
@@ -300,7 +335,7 @@ Abra a pasta do projeto no VS Code e instale as extensões Python e Python Debug
 app.py                 Login, inicialização e navegação Streamlit
 database/              Conexão SQLite, esquema e migrações
 services/              Regras, validações, importação e relatórios
-ui/                    Páginas e componentes de interface
+ui/                    Páginas, navegação compacta e estilos locais
 tests/                 Testes automatizados com bancos temporários
 scripts/               Configuração da senha, Firewall e Agendador
 run_mobile.bat/.ps1     Inicialização Windows, endereços e logs

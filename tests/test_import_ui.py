@@ -1,4 +1,3 @@
-from tests.ui_helpers import login
 """Exercita a prévia na interface; somente o seletor de arquivo é substituído.
 
 AppTest não expõe upload de arquivos. Os bytes abaixo passam pelo leitor,
@@ -13,6 +12,7 @@ from streamlit.testing.v1 import AppTest
 
 from database.core import get_connection, initialize
 from services.finance import create_account, list_transactions
+from tests.ui_helpers import login
 
 
 APP = str(Path(__file__).resolve().parents[1] / "app.py")
@@ -27,7 +27,8 @@ def start_import(tmp_path, monkeypatch, content):
     upload = SimpleNamespace(name="extrato.csv", getvalue=lambda: content)
     monkeypatch.setattr(st, "file_uploader", lambda *args, **kwargs: upload)
     app = login(AppTest.from_file(APP, default_timeout=15))
-    app.radio(key="navigation").set_value("Importar e exportar").run()
+    app.radio(key="navigation").set_value("Movimentos").run()
+    app.radio(key="movements_section").set_value("Importar e exportar").run()
     assert not app.exception
     return app, path
 
@@ -57,6 +58,12 @@ def test_csv_preview_confirmation_duplicate_and_encoding_change(tmp_path, monkey
         rows = list_transactions(db)
         assert len(rows) == 1
         assert rows[0]["description"] == "Café" and rows[0]["amount_cents"] == 1001
+    assert "_import_preview" not in app.session_state
+    # AppTest 1.50 conserva widgets removidos após um rerun interno. Reabra
+    # a interface autenticada para verificar duplicatas contra o banco real.
+    app = login(AppTest.from_file(APP, default_timeout=15))
+    app.radio(key="navigation").set_value("Movimentos").run()
+    app.radio(key="movements_section").set_value("Importar e exportar").run()
     click(app, "Gerar prévia")
     assert any("1 possíveis duplicatas" in text.value for text in app.markdown)
     next(c for c in app.checkbox if c.label.startswith("Conferi")).check().run()

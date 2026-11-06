@@ -17,6 +17,23 @@ def clear_session():
         manager.remove_orphaned_files()
 
 
+def _attempt_login():
+    """Callback: valida antes de renderizar a próxima página, sem tela obsoleta."""
+    try:
+        password_hash = load_password_hash()
+    except ValueError:
+        clear_session()
+        return
+    remaining = LOGIN_LIMITER.remaining()
+    if remaining:
+        st.session_state['_login_error'] = f'Muitas tentativas. Aguarde {remaining} segundos e tente novamente.'
+    elif verify_password(st.session_state.get('login_password', ''), password_hash):
+        sign_in(st.session_state, password_hash)
+    else:
+        LOGIN_LIMITER.failure()
+        st.session_state['_login_error'] = 'Senha incorreta.'
+
+
 def require_login():
     try:
         password_hash = load_password_hash()
@@ -28,24 +45,19 @@ def require_login():
         st.stop()
     if authenticated(st.session_state, password_hash):
         return
-    # Remove também exportações, arquivos importados e seleções da sessão antiga.
     if "_auth_token" in st.session_state or "_exports" in st.session_state:
         clear_session()
-    st.title("Minhas finanças")
-    st.caption("Acesso privado · Entre com sua senha para continuar.")
-    with st.form("login", clear_on_submit=True):
-        password = st.text_input("Senha", type="password", key="login_password", max_chars=72)
-        submitted = st.form_submit_button("Entrar", type="primary")
-    if submitted:
-        remaining = LOGIN_LIMITER.remaining()
-        if remaining:
-            st.error(f"Muitas tentativas. Aguarde {remaining} segundos e tente novamente.")
-        elif verify_password(password, password_hash):
-            sign_in(st.session_state, password_hash)
-            st.rerun()
-        else:
-            LOGIN_LIMITER.failure()
-            st.error("Senha incorreta.")
+    with st.container(key='glass_login'):
+        st.html('<p class="eyebrow">Seu espaço, só seu</p>')
+        st.title("Minhas finanças")
+        st.caption("Mais clareza para cuidar do que importa. Entre com sua senha para continuar.")
+        with st.form("login", clear_on_submit=True):
+            st.text_input("Senha", type="password", key="login_password", max_chars=72)
+            st.form_submit_button("Entrar", type="primary", width='stretch', on_click=_attempt_login)
+        message = st.session_state.pop('_login_error', None)
+        if message:
+            st.error(message)
+        st.caption('Acesso privado · Dados no seu PC')
     st.stop()
 
 

@@ -1,36 +1,35 @@
-"""Aplicativo local de controle financeiro pessoal. Execute na raiz do projeto."""
-from datetime import date
-import sqlite3
-import streamlit as st
-from database.core import get_connection, initialize
-from services.recurring import generate_due
-from ui import dashboard, transactions, catalogs, budgets, imports, recurrences, goals
-from ui.common import MONTH_NAMES, flash
-from ui.auth import require_login, logout_button
-from services.backup import backup_once
-from database.core import DEFAULT_DB
+"""Aplicativo financeiro local: autenticação, inicialização e quatro áreas."""
 import os
+import sqlite3
 
-st.set_page_config(page_title='Minhas finanças', page_icon='💰', layout='wide')
+import streamlit as st
+
+from database.core import DEFAULT_DB, get_connection, initialize
+from services.backup import backup_once
+from services.recurring import generate_due
+from ui import budgets, catalogs, dashboard, goals, imports, recurrences, shell, transactions
+from ui.auth import require_login
+from ui.common import flash, page_heading
+from ui.styles import apply_styles
+
+st.set_page_config(page_title='Minhas finanças', page_icon='💠', layout='wide')
+
+
+def settings_info():
+    page_heading('Seu espaço privado', 'Dados no seu PC, acesso pela sua rede.')
+    st.markdown('**Login e senha**  \nA sessão expira após 30 minutos sem interação. Para trocar a senha, '
+                'execute no PC `scripts/configurar_senha.py`.')
+    st.markdown('**Cópias de segurança**  \nO aplicativo mantém sete backups por banco, na pasta '
+                '`backups` ao lado dele. Encerre o app antes de restaurar uma cópia.')
+    st.markdown('**Acesso pelo celular**  \nUse a rede Tailscale com o PC ligado e sem suspensão. '
+                'Não utilize Funnel nem encaminhamento de portas. O passo a passo está no README.')
+    st.caption('O saldo mensal considera os movimentos daquele mês. Contas e cartões mostram todo o histórico.')
 
 
 def main():
+    apply_styles()
     require_login()
-    with st.sidebar:
-        st.title('Minhas finanças')
-        logout_button()
-        st.caption('Seu dinheiro, sob seu controle.')
-        page = st.radio('Navegação', ['Visão geral', 'Lançamentos', 'Contas e cartões', 'Categorias',
-            'Orçamento', 'Importar e exportar', 'Recorrências', 'Metas'], key='navigation')
-        st.divider()
-        st.subheader('Período')
-        today = date.today()
-        month = st.selectbox('Mês', list(range(1, 13)), index=today.month - 1,
-            format_func=lambda n: MONTH_NAMES[n - 1], key='selected_month')
-        year = st.number_input('Ano', min_value=1900, max_value=9998, value=today.year, step=1, key='selected_year')
-        st.caption('O período filtra a visão geral, os lançamentos e o orçamento. Contas, metas e recorrências mostram todo o histórico.')
-        st.divider()
-        st.caption('🔒 Dados locais em SQLite. Sem integrações ou envio de dados financeiros à internet.')
+    area, month = shell.render()
     db = None
     try:
         backup_once(os.environ.get('FINANCAS_DB_PATH', DEFAULT_DB))
@@ -40,19 +39,25 @@ def main():
         flash()
         if generated:
             st.info(f'{generated} lançamento(s) recorrente(s) gerado(s) até hoje.')
-        month_key = f'{year:04d}-{month:02d}'
-        st.caption(f'{MONTH_NAMES[month - 1]} de {year}')
-        handlers = {
-            'Visão geral': dashboard.render,
-            'Lançamentos': transactions.render,
-            'Contas e cartões': lambda db, month: catalogs.accounts_page(db),
-            'Categorias': lambda db, month: catalogs.categories_page(db),
-            'Orçamento': budgets.render,
-            'Importar e exportar': imports.render,
-            'Recorrências': recurrences.render,
-            'Metas': goals.render,
-        }
-        handlers[page](db, month_key)
+        if area == 'Resumo':
+            dashboard.render(db, month)
+        elif area == 'Movimentos':
+            section = st.radio('Movimentos', ['Lançamentos', 'Importar e exportar'],
+                               key='movements_section', horizontal=True, label_visibility='collapsed')
+            (transactions.render if section == 'Lançamentos' else imports.render)(db, month)
+        elif area == 'Planejamento':
+            section = st.radio('Planejamento', ['Orçamento', 'Recorrências', 'Metas'],
+                               key='planning_section', horizontal=True, label_visibility='collapsed')
+            {'Orçamento': budgets.render, 'Recorrências': recurrences.render, 'Metas': goals.render}[section](db, month)
+        else:
+            section = st.radio('Ajustes', ['Contas e cartões', 'Categorias', 'Sobre e segurança'],
+                               key='settings_section', horizontal=True, label_visibility='collapsed')
+            if section == 'Contas e cartões':
+                catalogs.accounts_page(db)
+            elif section == 'Categorias':
+                catalogs.categories_page(db)
+            else:
+                settings_info()
     except ValueError as exc:
         st.error(str(exc))
     except sqlite3.Error:

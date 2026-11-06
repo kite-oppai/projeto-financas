@@ -4,7 +4,7 @@ import json
 import streamlit as st
 from services.importing import read_csv, read_ofx, build_preview, import_preview, export_csv, export_excel
 from services.money import format_money, format_date
-from ui.common import require_catalogs, select_record, mutate
+from ui.common import require_catalogs, select_record, mutate, page_heading
 
 
 def mapping_field(label, columns, key, aliases, optional=False):
@@ -34,11 +34,12 @@ def import_section(db):
         mapping = {'date': 'date', 'description': 'description', 'amount': 'amount'}
         date_format = '%Y-%m-%d'
     else:
-        cols = st.columns(2)
-        delimiter = cols[0].selectbox('Separador', [';', ',', '\t', '|'],
-            format_func=lambda d: {';': 'Ponto e vírgula (;)', ',': 'Vírgula (,)', '\t': 'Tabulação', '|': 'Barra vertical (|)'}.get(d), key='csv_separator')
-        encoding = cols[1].selectbox('Codificação', ['utf-8-sig', 'cp1252', 'latin-1'],
-            format_func=lambda e: {'utf-8-sig': 'UTF-8', 'cp1252': 'Windows-1252', 'latin-1': 'Latin-1'}.get(e), key='csv_encoding')
+        with st.expander('Formato do CSV'):
+            cols = st.columns(2)
+            delimiter = cols[0].selectbox('Separador', [';', ',', '\t', '|'],
+                format_func=lambda d: {';': 'Ponto e vírgula (;)', ',': 'Vírgula (,)', '\t': 'Tabulação', '|': 'Barra vertical (|)'}.get(d), key='csv_separator')
+            encoding = cols[1].selectbox('Codificação', ['utf-8-sig', 'cp1252', 'latin-1'],
+                format_func=lambda e: {'utf-8-sig': 'UTF-8', 'cp1252': 'Windows-1252', 'latin-1': 'Latin-1'}.get(e), key='csv_encoding')
         rows = read_csv(data, delimiter=delimiter, encoding=encoding)
         if not rows:
             st.warning('O arquivo não contém linhas de dados.')
@@ -49,9 +50,10 @@ def import_section(db):
             'date': mapping_field('Coluna de data', columns, 'csv_date', ['data', 'date']),
             'description': mapping_field('Coluna de descrição', columns, 'csv_description', ['descrição', 'descricao', 'description', 'histórico', 'historico']),
             'amount': mapping_field('Coluna de valor', columns, 'csv_amount', ['valor', 'amount', 'value']),
-            'type': mapping_field('Coluna de tipo (opcional)', columns, 'csv_type', ['tipo', 'type'], optional=True),
-            'notes': mapping_field('Coluna de observação (opcional)', columns, 'csv_notes', ['observação', 'observacao', 'notes'], optional=True),
         }
+        with st.expander('Colunas opcionais'):
+            mapping['type'] = mapping_field('Coluna de tipo (opcional)', columns, 'csv_type', ['tipo', 'type'], optional=True)
+            mapping['notes'] = mapping_field('Coluna de observação (opcional)', columns, 'csv_notes', ['observação', 'observacao', 'notes'], optional=True)
         mapping = {k: v for k, v in mapping.items() if v is not None}
         date_format = st.selectbox('Formato da data no arquivo', ['%d/%m/%Y', '%Y-%m-%d', '%m/%d/%Y'],
             format_func=lambda f: {'%d/%m/%Y': 'dd/mm/aaaa', '%Y-%m-%d': 'aaaa-mm-dd', '%m/%d/%Y': 'mm/dd/aaaa'}.get(f), key='csv_date_format')
@@ -94,22 +96,20 @@ def import_section(db):
 
 
 def render(db, month):
-    st.header('Importar e exportar')
-    imports, exports = st.tabs(['Importar extrato', 'Exportar todos os dados'])
-    with imports:
-        imported_count = st.session_state.pop('_import_result_count', None)
-        if imported_count is not None:
-            st.info(f'{imported_count} lançamento(s) salvo(s). Duplicatas foram ignoradas, salvo inclusão explícita.')
-        try:
-            import_section(db)
-        except ValueError as exc:
-            st.error(str(exc))
-    with exports:
-        st.caption('Exportações incluem todas as tabelas e todo o histórico: lançamentos, categorias, contas, orçamentos, recorrências, metas e aportes. Guarde os arquivos em um local privado. Para backup completo, copie o SQLite com o aplicativo fechado.')
+    page_heading('Importar e exportar', 'Traga seu extrato ou guarde uma cópia dos seus registros.')
+    imported_count = st.session_state.pop('_import_result_count', None)
+    if imported_count is not None:
+        st.info(f'{imported_count} lançamento(s) salvo(s). Duplicatas foram ignoradas, salvo inclusão explícita.')
+    try:
+        import_section(db)
+    except ValueError as exc:
+        st.error(str(exc))
+    with st.expander('Exportar todos os dados'):
+        st.caption('Inclui todo o histórico: lançamentos, categorias, contas, orçamentos, recorrências, metas e aportes. Guarde os arquivos em um local privado. Para restauração completa, use o backup do SQLite.')
         if st.button('Preparar arquivos para download'):
             st.session_state['_exports'] = {'csv': export_csv(db), 'excel': export_excel(db)}
         files = st.session_state.get('_exports')
         if files:
-            st.info('Os arquivos refletem os dados no momento em que foram preparados. Clique novamente em Preparar arquivos após alterações.')
+            st.caption('Os arquivos refletem os dados no momento da preparação. Prepare novamente após alterações.')
             st.download_button('Baixar CSVs (ZIP)', files['csv'], 'financas_csv.zip', mime='application/zip')
             st.download_button('Baixar Excel', files['excel'], 'financas.xlsx', mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

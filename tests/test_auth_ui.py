@@ -23,7 +23,8 @@ def test_no_navigation_no_database_and_no_exports_before_login(tmp_path, monkeyp
     app.text_input(key="login_password").set_value(TEST_PASSWORD)
     next(button for button in app.button if button.label == "Entrar").click().run()
     assert app.radio and database.exists()
-    app.radio(key="navigation").set_value("Importar e exportar").run()
+    app.radio(key="navigation").set_value("Movimentos").run()
+    app.radio(key="movements_section").set_value("Importar e exportar").run()
     next(b for b in app.button if b.label == "Preparar arquivos para download").click().run()
     assert len(app.get("download_button")) == 2
     app.button(key="logout").click().run()

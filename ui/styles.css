@@ -1,0 +1,143 @@
+:root {
+  --ink: #202d49;
+  --muted: #606b82;
+  --accent: #5158b8;
+  --accent-soft: #ebedfa;
+  --income: #14775f;
+  --expense: #ae465b;
+  --surface: #ffffff;
+  --glass: rgba(255, 255, 255, .76);
+  --glass-shadow: 0 18px 50px -28px rgba(45, 54, 116, .32), inset 0 1px 0 rgba(255,255,255,.95);
+  --radius: 26px;
+  --spring: cubic-bezier(.22, 1, .36, 1);
+}
+[data-testid="stAppViewContainer"] {
+  color: var(--ink);
+  background: radial-gradient(ellipse at 0% 4%, #e5eafa 0%, transparent 47%),
+              radial-gradient(ellipse at 100% 28%, #f0eafb 0%, transparent 48%), #f7f8fc;
+}
+[data-testid="stHeader"] {background: transparent;}
+/* O projeto é local: remove só o atalho de hospedagem do Streamlit, não o menu de controle. */
+[data-testid="stAppDeployButton"] {display: none;}
+[data-testid="stMainBlockContainer"] {max-width: 1120px; padding: 2.7rem 2rem 4rem;}
+[data-testid="stVerticalBlock"] {gap: 1rem;}
+h1, h2, h3 {color: var(--ink); letter-spacing: -.035em; font-weight: 650;}
+h1 {font-size: clamp(1.85rem, 4vw, 2.6rem);}
+h2 {font-size: 1.65rem;}
+h3 {font-size: 1.2rem; padding-bottom: .25rem;}
+[data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {color: var(--muted); line-height: 1.6;}
+[data-testid="stMetricValue"] {font-variant-numeric: tabular-nums; letter-spacing: -.035em; overflow-wrap: anywhere;}
+[data-testid="stMetricValue"], [data-testid="stMetricValue"] > div {
+  white-space: normal; text-overflow: clip; overflow-wrap: anywhere;
+}
+[data-testid="stMetricLabel"] {color: var(--muted);}
+[data-testid="stButton"] button, [data-testid="stFormSubmitButton"] button,
+[data-testid="stDownloadButton"] button, [data-testid="stPopover"] > button {
+  min-height: 44px; border-radius: 15px; font-weight: 550;
+  border-color: #d8ddea; color: var(--ink); background: rgba(255,255,255,.9);
+  transition: transform 190ms var(--spring), box-shadow 190ms var(--spring), background 190ms ease;
+}
+[data-testid="stButton"] button:hover, [data-testid="stPopover"] > button:hover {
+  transform: translateY(-1px); box-shadow: 0 6px 20px -12px #6878b0; border-color: #a5acd9;
+}
+[data-testid="stButton"] button:active, [data-testid="stFormSubmitButton"] button:active {
+  transform: scale(.975);
+}
+button[kind="primary"], button[kind="primaryFormSubmit"] {
+  background: var(--accent); border-color: var(--accent); color: white;
+  box-shadow: 0 7px 18px -10px #5158b8;
+}
+button:focus-visible, input:focus-visible, textarea:focus-visible, [role="radio"]:focus-visible {
+  outline: 3px solid #666ece !important; outline-offset: 3px;
+}
+[data-baseweb="input"], [data-baseweb="select"] > div, [data-baseweb="textarea"] {
+  border-radius: 12px; background: #fff; min-height: 44px;
+}
+[data-testid="stForm"] {border: 0; padding: .25rem 0;}
+[data-testid="stExpander"] {border: 0; background: rgba(255,255,255,.45); border-radius: 16px;}
+[data-testid="stExpander"] summary {min-height: 44px;}
+[data-testid="stRadio"] [role="radiogroup"] > label,
+[data-testid="stCheckbox"] label, [data-testid="stToggle"] label {min-height: 44px; align-items: center;}
+/* Glass is reserved for floating navigation, the main balance and modal surfaces. */
+.st-key-glass_nav, .st-key-glass_hero, .st-key-glass_login,
+[data-testid="stDialog"] [role="dialog"], [data-testid="stPopoverBody"] {
+  position: relative; border: 1px solid transparent; border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(255,255,255,.86), rgba(255,255,255,.66)) padding-box,
+              linear-gradient(145deg, #fff, rgba(162,176,225,.35), rgba(255,255,255,.85)) border-box;
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  backdrop-filter: blur(22px) saturate(145%);
+  box-shadow: var(--glass-shadow);
+}
+.st-key-glass_nav {padding: .45rem .65rem; margin: .2rem 0 .8rem;}
+.st-key-glass_hero {padding: 1.7rem 2rem; margin-bottom: .75rem;}
+.st-key-glass_login {padding: 2rem; margin: 5vh auto 1rem; width: 100%; max-width: 460px;}
+.st-key-glass_nav::before, .st-key-glass_hero::before, .st-key-glass_login::before {
+  content: ''; position: absolute; pointer-events: none; left: 10%; right: 10%; top: 0;
+  height: 1px; background: linear-gradient(90deg, transparent, #fff, transparent);
+}
+.st-key-glass_hero > [data-testid="stVerticalBlock"] {gap: .75rem;}
+.st-key-glass_hero [data-testid="stMetricValue"] {font-size: clamp(2rem, 5.5vw, 3.45rem); line-height: 1.25;}
+.st-key-cashflow [data-testid="stMetricValue"] {font-size: clamp(1.15rem, 3.5vw, 1.7rem);}
+.st-key-cashflow [data-testid="stColumn"]:first-child [data-testid="stMetricValue"] {color: var(--income);}
+.st-key-cashflow [data-testid="stColumn"]:last-child [data-testid="stMetricValue"] {color: var(--expense);}
+.st-key-glass_nav [role="radiogroup"] {display: flex; gap: .25rem; flex-wrap: nowrap; width: 100%;}
+.st-key-glass_nav [role="radiogroup"] > label {
+  flex: 1; justify-content: center; margin: 0; padding: .65rem .25rem;
+  min-height: 44px; border-radius: 17px; transition: all 220ms var(--spring); cursor: pointer;
+}
+.st-key-glass_nav [role="radiogroup"] > label > div:first-child {position: absolute; opacity: 0; width: 1px;}
+.st-key-glass_nav [role="radiogroup"] > label:has(input:checked) {
+  background: rgba(255,255,255,.98); box-shadow: 0 4px 15px -8px #7482b2; color: var(--accent);
+}
+.st-key-glass_nav [role="radiogroup"] > label:has(input:focus-visible) {outline: 3px solid #666ece; outline-offset: 2px;}
+.st-key-glass_nav [role="radiogroup"] > label:hover {background-color: rgba(255,255,255,.6);}
+.st-key-glass_nav [role="radiogroup"] p {white-space: nowrap;}
+.st-key-period_controls [data-testid="stHorizontalBlock"],
+.st-key-cashflow [data-testid="stHorizontalBlock"] {flex-wrap: nowrap; gap: .65rem;}
+.st-key-period_controls [data-testid="stColumn"], .st-key-cashflow [data-testid="stColumn"] {min-width: 0;}
+.st-key-period_controls button {width: 100%; white-space: nowrap;}
+.st-key-period_controls {max-width: 365px;}
+.st-key-masthead {margin-bottom: .25rem;}
+.st-key-masthead [data-testid="stHorizontalBlock"] {flex-wrap: nowrap;}
+.st-key-masthead [data-testid="stColumn"] {min-width: 0;}
+.st-key-masthead [data-testid="stColumn"]:first-child {flex: 1 1 0;}
+.st-key-masthead [data-testid="stColumn"]:last-child {flex: 0 0 64px; width: 64px;}
+.eyebrow {font-size: .7rem; letter-spacing: .17em; text-transform: uppercase; font-weight: 650; color: var(--muted); margin: 0 0 .5rem;}
+.brand-title {font-size: clamp(1.5rem, 4.2vw, 2rem); letter-spacing: -.05em; font-weight: 650; line-height: 1.25; margin: 0; color: var(--ink);}
+.brand-caption {font-size: .88rem; color: var(--muted); margin-top: .45rem;}
+.tx-list {display: flex; flex-direction: column; gap: 0;}
+.tx-row {display: grid; grid-template-columns: minmax(0,1fr) auto; gap: .8rem; align-items: center; padding: .8rem 0;}
+.tx-description {font-size: .95rem; font-weight: 550; overflow-wrap: anywhere; color: var(--ink); line-height: 1.4;}
+.tx-meta {font-size: .76rem; color: var(--muted); margin-top: .25rem; overflow-wrap: anywhere;}
+.tx-amount {font-size: .9rem; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; max-width: 11rem;}
+.tx-income {color: var(--income);}
+.tx-expense {color: var(--expense);}
+.status-pill {display: inline-block; padding: .3rem .65rem; border-radius: 10px; font-size: .78rem; font-weight: 550; margin: .1rem 0 .4rem; background: #edf0f6; color: #4f5e77;}
+.status-pill--success {background: #e5f3ed; color: #12694e;}
+.status-pill--warning {background: #fff2d7; color: #795000;}
+.status-pill--danger {background: #fbe9ed; color: #963d50;}
+[data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li {overflow-wrap: anywhere;}
+[data-testid="stPlotlyChart"] {overflow: hidden; border-radius: 16px;}
+[data-testid="stAlertContainer"] {border-radius: 14px;}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .st-key-glass_nav, .st-key-glass_hero, .st-key-glass_login,
+  [data-testid="stDialog"] [role="dialog"], [data-testid="stPopoverBody"] {background: #f9faff;}
+}
+@media (max-width: 640px) {
+  [data-testid="stMainBlockContainer"] {padding: 2.8rem 1rem 2rem;}
+  [data-testid="stVerticalBlock"] {gap: .8rem;}
+  .st-key-glass_nav {padding: .3rem; border-radius: 21px; margin-bottom: .6rem;}
+  .st-key-glass_nav [role="radiogroup"] > label {padding: .6rem .15rem; border-radius: 15px;}
+  .st-key-glass_nav [role="radiogroup"] p {font-size: .8rem;}
+  .st-key-glass_hero {padding: 1.3rem; border-radius: 24px;}
+  .st-key-glass_login {padding: 1.3rem; margin-top: 1vh;}
+  .st-key-period_controls {max-width: 100%;}
+  .st-key-period_controls [data-testid="stColumn"] {flex: 1 1 0; width: 0;}
+  .st-key-period_controls [data-testid="stColumn"]:nth-child(2) {flex-grow: 3.4;}
+  .st-key-cashflow [data-testid="stColumn"] {flex: 1 1 0; width: 0;}
+  .tx-amount {max-width: 8.2rem; font-size: .83rem;}
+  [data-testid="stDialog"] [role="dialog"] {max-width: calc(100vw - 1.5rem); padding: 1.2rem;}
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {animation: none !important; transition: none !important; scroll-behavior: auto !important;}
+}
